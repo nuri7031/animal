@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>숨바꼭질 ㄱㄴㄷ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Nanum Gothic', 'Malgun Gothic', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            width: 100%;
+            background-color: #fff8e1;
+            border-bottom: 2px solid #ffe082;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        
+        .header-title-zone {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 {
+            margin: 0;
+            color: #ff6f00;
+            font-size: 22px;
+            letter-spacing: -1px;
+            white-space: nowrap;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .upload-btn, .bgm-btn {
+            background-color: #ffffff;
+            color: #444;
+            border: 2px solid #ffd54f;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .bgm-btn.active {
+            background-color: #ffb300;
+            color: white;
+            border-color: #ffb300;
+        }
+        #file-input { display: none; }
+
+        nav {
+            display: flex;
+            gap: 8px;
+        }
+        nav button {
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            background-color: #ffffff;
+            color: #666;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        nav button.active {
+            background-color: #ff8f00;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            flex-grow: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .screen.active { display: flex; }
+
+        .status-badge {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            border: 1px solid #a5d6a7;
+            flex-shrink: 0;
+            margin-bottom: 8px;
+        }
+
+        /* 1. 동물 어휘 학습 */
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: center;
+        }
+        .vocab-card {
+            background: white;
+            border-radius: 22px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            border: 4px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90%;
+            position: relative;
+        }
+        .vocab-card canvas {
+            width: 210px;
+            height: 210px;
+            border-radius: 16px;
+        }
+        .drop-box {
+            width: 100%;
+            height: 60px;
+            margin-top: 15px;
+            border: 3px dashed #90caf9;
+            border-radius: 14px;
+            background-color: #f1f8e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2e7d32;
+            transition: all 0.2s;
+        }
+        .drop-box.hovered {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            transform: scale(1.03);
+        }
+        .drop-box.correct {
+            border: 3px solid #4caf50;
+            background-color: #e8f5e9;
+        }
+
+        .word-pool {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .word-chip {
+            background-color: #ffb74d;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 14px 36px;
+            border-radius: 18px;
+            cursor: grab;
+            box-shadow: 0 4px #f57c00;
+            touch-action: none;
+        }
+        
+        .practice-highlight {
+            border-color: #ff6f00 !important;
+            box-shadow: 0 0 18px rgba(255, 111, 0, 0.8) !important;
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 2. 자음 찾기 */
+        .g1-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+            gap: 15px;
+        }
+        .card-display {
+            background: white;
+            border-radius: 28px;
+            padding: 15px 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #fff3e0;
+        }
+        #g1-canvas {
+            width: 260px;
+            height: 260px;
+            border-radius: 20px;
+        }
+        .animal-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 8px;
+            color: #333;
+        }
+
+        .consonant-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 850px;
+        }
+        .consonant-btn {
+            background-color: #81c784;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            border: none;
+            border-radius: 16px;
+            padding: 18px 0;
+            cursor: pointer;
+            box-shadow: 0 5px #66bb6a;
+        }
+
+        /* 3, 4. 글씨쓰기 */
+        .g2-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            gap: 10px;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            background: white;
+            border: 5px dashed #64b5f6;
+            border-radius: 25px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+        }
+        
+        .guide-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0.22;
+            color: #2196f3;
+            letter-spacing: -6px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        
+        #draw-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            touch-action: none;
+            cursor: crosshair;
+            z-index: 10;
+        }
+
+        .write-bottom-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            height: 110px;
+            flex-shrink: 0;
+        }
+
+        .write-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .write-controls button {
+            padding: 12px 22px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 14px;
+            background-color: #ff80ab;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 3px rgba(0,0,0,0.1);
+            white-space: nowrap;
+        }
+
+        .animal-list {
+            display: flex;
+            gap: 12px;
+            flex-grow: 1;
+            overflow-x: auto;
+            padding: 4px 0;
+            align-items: center;
+            -webkit-overflow-scrolling: touch;
+        }
+        .animal-item {
+            background: white;
+            border: 3px solid #eee;
+            border-radius: 16px;
+            padding: 6px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 95px;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+        .animal-item:active {
+            transform: scale(0.95);
+        }
+        .animal-item.selected {
+            border-color: #ffb300;
+            background-color: #fff8e1;
+        }
+        .animal-item canvas {
+            width: 65px;
+            height: 65px;
+            border-radius: 10px;
+        }
+        .animal-item .name {
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 4px;
+            color: #444;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        .modal-card {
+            background: white;
+            padding: 35px 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .modal-card h2 { color: #ff6f00; margin-top: 0; font-size: 28px; }
+        .modal-card p { font-size: 18px; color: #555; }
+        .modal-card button {
+            background-color: #ff8f00;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            display: none;
+            z-index: 100;
+            text-shadow: 0 0 20px rgba(0,0,0,0.2);
+            animation: pop 0.4s ease-in-out;
+        }
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            80% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title-zone">
+            <h1>숨바꼭질 ㄱㄴㄷ</h1>
+            <nav>
+                <button id="nav-g0" class="active" onclick="switchGame('g0')">1. 동물 어휘 학습</button>
+                <button id="nav-g1" onclick="switchGame('g1')">2. 자음 찾기</button>
+                <button id="nav-g2-1" onclick="switchGame('g2-1')">3. 첫글자 쓰기</button>
+                <button id="nav-g2-2" onclick="switchGame('g2-2')">4. 전체 쓰기</button>
+            </nav>
+        </div>
+        <div class="header-controls">
+            <label for="file-input" class="upload-btn">📁 다른 이미지 연결</label>
+            <input type="file" id="file-input" accept="image/*" onchange="handleImageUpload(event)">
+            <button id="bgm-toggle-btn" class="bgm-btn active" onclick="toggleBGM()">🎵 BGM ON</button>
+        </div>
+    </header>
+
+    <div class="container" id="main-container">
+        <div id="screen-g0" class="screen active">
+            <div id="status-badge-g0" class="status-badge">1. 동물 어휘 학습 (글자 타일을 끌어다 놓으세요)</div>
+            <div class="vocab-grid" id="vocab-grid"></div>
+            <div class="word-pool" id="word-pool"></div>
+        </div>
+
+        <div id="screen-g1" class="screen">
+            <div id="status-badge" class="status-badge">연습 게임 (1/3)</div>
+            <div class="g1-content">
+                <div class="card-display" onclick="speakCurrentAnimal()">
+                    <canvas id="g1-canvas" width="260" height="260"></canvas>
+                    <div class="animal-name" id="g1-name">기린</div>
+                </div>
+                <div class="consonant-grid" id="consonant-grid"></div>
+            </div>
+        </div>
+
+        <div id="screen-g2" class="screen">
+            <div class="g2-layout">
+                <div class="canvas-container" id="canvas-container">
+                    <div class="guide-text" id="guide-text"></div>
+                    <canvas id="draw-canvas"></canvas>
+                </div>
+                <div class="write-bottom-bar">
+                    <div class="write-controls">
+                        <button onclick="speakCurrentAnimal()">🔊 소리 듣기</button>
+                        <button onclick="clearCanvas()">지우기</button>
+                    </div>
+                    <div class="animal-list" id="animal-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <h2 id="modal-title">👏 참 잘했어요!</h2>
+            <p id="modal-desc">다음으로 넘어가볼까요?</p>
+            <button id="modal-btn" onclick="startRealGame()">🚀 문제 도전!</button>
+        </div>
+    </div>
+
+    <div id="feedback" class="feedback">⭕</div>
+
+    <script>
+        const animals = [
+            { char: 'ㄱ', name: '기린', row: 0, col: 0 },
+            { char: 'ㄴ', name: '나비', row: 0, col: 1 },
+            { char: 'ㄷ', name: '다람쥐', row: 0, col: 2 },
+            { char: 'ㄹ', name: '라마', row: 1, col: 0 },
+            { char: 'ㅁ', name: '문어', row: 1, col: 1 },
+            { char: 'ㅂ', name: '부엉이', row: 1, col: 2 },
+            { char: 'ㅅ', name: '소', row: 2, col: 0 },
+            { char: 'ㅇ', name: '앵무새', row: 2, col: 1 },
+            { char: 'ㅈ', name: '잠자리', row: 2, col: 2 },
+            { char: 'ㅊ', name: '청개구리', row: 3, col: 0 },
+            { char: 'ㅋ', name: '코알라', row: 3, col: 1 },
+            { char: 'ㅌ', name: '토끼', row: 3, col: 2 },
+            { char: 'ㅍ', name: '펭귄', row: 4, col: 0 },
+            { char: 'ㅎ', name: '호랑이', row: 4, col: 1 }
+        ];
+
+        const consonants = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+        const consonantSounds = {
+            'ㄱ': '그', 'ㄴ': '느', 'ㄷ': '드', 'ㄹ': '르', 'ㅁ': '므', 'ㅂ': '브', 'ㅅ': '스',
+            'ㅇ': '으', 'ㅈ': '즈', 'ㅊ': '츠', 'ㅋ': '크', 'ㅌ': '트', 'ㅍ': '프', 'ㅎ': '흐'
+        };
+
+        let currentGame = 'g0';
+        let currentAnimalIndex = 0;
+        let spriteImage = new Image();
+        let isImageLoaded = false;
+
+        let gameMode = 'PRACTICE'; 
+        let currentQuestionNum = 1;
+        let totalQuestions = 3;
+
+        let audioCtx = null;
+        let bgmIsOn = true;
+        let bgmInterval = null;
+
+        // 웹 페이지 로드 시 animal.jpeg 자동 연결
+        window.addEventListener('DOMContentLoaded', () => {
+            spriteImage.src = 'animal.jpeg';
+            spriteImage.onload = () => {
+                isImageLoaded = true;
+                initConsonants();
+                initAnimalList();
+                initCanvas();
+                switchGame('g0');
+            };
+        });
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (bgmIsOn) startBGM();
+            }
+        }
+
+        function startBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            const melody = [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 392.00];
+            let noteIdx = 0;
+            bgmInterval = setInterval(() => {
+                if (!bgmIsOn || !audioCtx) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(melody[noteIdx], audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime); 
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.22);
+                    noteIdx = (noteIdx + 1) % melody.length;
+                } catch(e) {}
+            }, 280);
+        }
+
+        function toggleBGM() {
+            bgmIsOn = !bgmIsOn;
+            const btn = document.getElementById('bgm-toggle-btn');
+            if (bgmIsOn) {
+                btn.innerText = '🎵 BGM ON';
+                btn.classList.add('active');
+                initAudio();
+            } else {
+                btn.innerText = '🔇 BGM OFF';
+                btn.classList.remove('active');
+            }
+        }
+
+        function playSoundEffect(type) {
+            initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            if (type === 'correct') {
+                [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.25);
+                });
+            } else if (type === 'wrong') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.value = 160;
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+
+        function handleImageUpload(e) {
+            initAudio();
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                spriteImage.src = event.target.result;
+                spriteImage.onload = () => {
+                    isImageLoaded = true;
+                    initConsonants();
+                    initAnimalList();
+                    initCanvas();
+                    switchGame('g0');
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawAnimalCrop(targetCanvas, animalIndex) {
+            if (!isImageLoaded) return;
+            const ctx = targetCanvas.getContext('2d');
+            const animal = animals[animalIndex];
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+
+            const cellW = spriteImage.width / 3;
+            const cellH = spriteImage.height / 5;
+            const borderAdjust = cellW * 0.02;
+
+            const sx = animal.col * cellW + borderAdjust;
+            const sy = animal.row * cellH + borderAdjust;
+            const sWidth = cellW - borderAdjust * 2;
+            const sHeight = cellH - borderAdjust * 2;
+
+            ctx.drawImage(spriteImage, sx, sy, sWidth, sHeight, 0, 0, targetCanvas.width, targetCanvas.height);
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function speakCurrentAnimal() {
+            initAudio();
+            speak(animals[currentAnimalIndex].name);
+        }
+
+        let vocabBatchIndex = 0;
+        let vocabTargetIndex = 0;
+        let solvedCountInBatch = 0;
+        let draggedName = '';
+
+        function initVocabGame() {
+            const grid = document.getElementById('vocab-grid');
+            const pool = document.getElementById('word-pool');
+            grid.innerHTML = '';
+            pool.innerHTML = '';
+
+            const batchAnimals = animals.slice(vocabBatchIndex * 2, (vocabBatchIndex + 1) * 2);
+            vocabTargetIndex = 0;
+            solvedCountInBatch = 0;
+
+            batchAnimals.forEach((animal, idx) => {
+                const card = document.createElement('div');
+                card.className = 'vocab-card';
+                card.id = `vocab-card-${idx}`;
+
+                const c = document.createElement('canvas');
+                c.width = 210; c.height = 210;
+                card.appendChild(c);
+                drawAnimalCrop(c, animals.indexOf(animal));
+
+                const dropBox = document.createElement('div');
+                dropBox.className = 'drop-box';
+                dropBox.dataset.answer = animal.name;
+                dropBox.innerText = '';
+
+                dropBox.addEventListener('dragover', (e) => e.preventDefault());
+                dropBox.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    processMatching(animal.name, dropBox);
+                });
+
+                card.appendChild(dropBox);
+                grid.appendChild(card);
+            });
+
+            const shuffledWords = [...batchAnimals].sort(() => Math.random() - 0.5);
+            shuffledWords.forEach(animal => {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.dataset.name = animal.name;
+                chip.innerText = animal.name;
+                chip.draggable = true;
+
+                chip.addEventListener('dragstart', (e) => {
+                    draggedName = animal.name;
+                    e.dataTransfer.setData('text/plain', animal.name);
+                    speak(animal.name);
+                });
+
+                chip.addEventListener('touchstart', (e) => {
+                    draggedName = animal.name;
+                    speak(animal.name);
+                }, {passive: true});
+
+                chip.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    checkProximityAndMatch(touch.clientX, touch.clientY, animal.name);
+                }, {passive: false});
+
+                pool.appendChild(chip);
+            });
+
+            document.ondragover = (e) => {
+                if (draggedName) {
+                    checkProximityAndMatch(e.clientX, e.clientY, draggedName);
+                }
+            };
+
+            updateVocabHighlights();
+        }
+
+        function checkProximityAndMatch(clientX, clientY, wordName) {
+            const dropBoxes = document.querySelectorAll('.drop-box');
+            const PROXIMITY_MARGIN = 35;
+
+            dropBoxes.forEach(box => {
+                if (box.classList.contains('correct')) return;
+                
+                const rect = box.getBoundingClientRect();
+                const isNear = (
+                    clientX >= rect.left - PROXIMITY_MARGIN &&
+                    clientX <= rect.right + PROXIMITY_MARGIN &&
+                    clientY >= rect.top - PROXIMITY_MARGIN &&
+                    clientY <= rect.bottom + PROXIMITY_MARGIN
+                );
+
+                if (isNear) {
+                    box.classList.add('hovered');
+                    if (wordName === box.dataset.answer) {
+                        processMatching(wordName, box);
+                        draggedName = '';
+                    }
+                } else {
+                    box.classList.remove('hovered');
+                }
+            });
+        }
+
+        function processMatching(inputWord, dropBox) {
+            const answer = dropBox.dataset.answer;
+            dropBox.classList.remove('hovered');
+
+            if (dropBox.classList.contains('correct')) return;
+
+            if (inputWord === answer) {
+                playSoundEffect('correct');
+                dropBox.innerText = answer;
+                dropBox.classList.add('correct');
+                showFeedback('⭕', '#4caf50');
+
+                document.querySelectorAll('.word-chip').forEach(chip => {
+                    if (chip.dataset.name === answer) {
+                        chip.style.visibility = 'hidden';
+                    }
+                });
+
+                solvedCountInBatch++;
+                vocabTargetIndex++;
+
+                const batchAnimals = animals.slice(vocabBatchIndex * 2, (vocabBatchIndex + 1) * 2);
+
+                if (solvedCountInBatch >= batchAnimals.length) {
+                    setTimeout(() => {
+                        vocabBatchIndex++;
+                        if (vocabBatchIndex * 2 < animals.length) {
+                            showAutoPopup("👏 참 잘했어요!", "다음으로 넘어가볼까요?", 1500, () => {
+                                initVocabGame();
+                            });
+                        } else {
+                            showModal("🏆 어휘 학습 완료!", "모든 동물의 이름을 완벽하게 완성했어요!", "처음부터 다시", () => {
+                                document.getElementById('modal-overlay').style.display = 'none';
+                                vocabBatchIndex = 0;
+                                initVocabGame();
+                            });
+                        }
+                    }, 800);
+                } else {
+                    updateVocabHighlights();
+                }
+            } else {
+                playSoundEffect('wrong');
+                showFeedback('❌', '#e53935');
+            }
+        }
+
+        function updateVocabHighlights() {
+            document.querySelectorAll('.vocab-card').forEach(c => c.classList.remove('practice-highlight'));
+            document.querySelectorAll('.word-chip').forEach(w => w.classList.remove('practice-highlight'));
+
+            const batchAnimals = animals.slice(vocabBatchIndex * 2, (vocabBatchIndex + 1) * 2);
+            if (vocabTargetIndex < batchAnimals.length) {
+                const targetAnimal = batchAnimals[vocabTargetIndex];
+
+                const activeCard = document.getElementById(`vocab-card-${vocabTargetIndex}`);
+                if (activeCard) activeCard.classList.add('practice-highlight');
+
+                document.querySelectorAll('.word-chip').forEach(chip => {
+                    if (chip.dataset.name === targetAnimal.name) {
+                        chip.classList.add('practice-highlight');
+                    }
+                });
+            }
+        }
+
+        function showAutoPopup(title, desc, duration, callback) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            const btn = document.getElementById('modal-btn');
+            btn.style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('modal-overlay').style.display = 'none';
+                if (callback) callback();
+            }, duration);
+        }
+
+        function switchGame(gameType) {
+            currentGame = gameType;
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+            if (gameType === 'g0') {
+                document.getElementById('nav-g0').classList.add('active');
+                document.getElementById('screen-g0').classList.add('active');
+                if (isImageLoaded) {
+                    vocabBatchIndex = 0;
+                    initVocabGame();
+                }
+            } else if (gameType === 'g1') {
+                document.getElementById('nav-g1').classList.add('active');
+                document.getElementById('screen-g1').classList.add('active');
+                if (isImageLoaded) resetToPractice();
+            } else {
+                if (gameType === 'g2-1') document.getElementById('nav-g2-1').classList.add('active');
+                if (gameType === 'g2-2') document.getElementById('nav-g2-2').classList.add('active');
+                document.getElementById('screen-g2').classList.add('active');
+                if (isImageLoaded) {
+                    loadGame2();
+                    setTimeout(resizeCanvas, 50);
+                }
+            }
+        }
+
+        function resetToPractice() {
+            gameMode = 'PRACTICE';
+            currentQuestionNum = 1;
+            totalQuestions = 3;
+            nextQuestion();
+        }
+
+        function startRealGame() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            gameMode = 'REAL';
+            currentQuestionNum = 1;
+            totalQuestions = 10;
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            updateStatusBadge();
+            currentAnimalIndex = Math.floor(Math.random() * animals.length);
+            const animal = animals[currentAnimalIndex];
+
+            const g1Canvas = document.getElementById('g1-canvas');
+            drawAnimalCrop(g1Canvas, currentAnimalIndex);
+            document.getElementById('g1-name').innerText = animal.name;
+
+            const btns = document.querySelectorAll('.consonant-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('practice-highlight');
+                if (gameMode === 'PRACTICE' && btn.innerText === animal.char) {
+                    btn.classList.add('practice-highlight');
+                }
+            });
+        }
+
+        function updateStatusBadge() {
+            const badge = document.getElementById('status-badge');
+            if (gameMode === 'PRACTICE') {
+                badge.innerText = `연습 게임 (${currentQuestionNum}/${totalQuestions})`;
+            } else {
+                badge.innerText = `실전 문제 도전! (${currentQuestionNum}/${totalQuestions})`;
+            }
+        }
+
+        function checkConsonant(selectedConsonant) {
+            initAudio();
+            const targetAnimal = animals[currentAnimalIndex];
+            speak(consonantSounds[selectedConsonant]);
+
+            setTimeout(() => {
+                if (targetAnimal.char === selectedConsonant) {
+                    playSoundEffect('correct');
+                    showFeedback('⭕', '#4caf50');
+                    setTimeout(() => {
+                        if (currentQuestionNum < totalQuestions) {
+                            currentQuestionNum++;
+                            nextQuestion();
+                        } else {
+                            if (gameMode === 'PRACTICE') {
+                                showModal("🎉 연습 완료!", "참 잘했어요! 이제 10문제 도전으로 넘어가볼까요?", "🚀 문제 도전!", startRealGame);
+                            } else {
+                                showModal("🏆 도전 성공!", "10문제를 모두 풀었어요! 대단해요!", "🔄 다시 하기", resetToPractice);
+                            }
+                        }
+                    }, 1000);
+                } else {
+                    playSoundEffect('wrong');
+                    showFeedback('❌', '#e53935');
+                }
+            }, 300);
+        }
+
+        function showModal(title, desc, btnText, btnAction) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            const btn = document.getElementById('modal-btn');
+            btn.style.display = 'inline-block';
+            btn.innerText = btnText;
+            btn.onclick = btnAction;
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function showFeedback(symbol, color) {
+            const fb = document.getElementById('feedback');
+            fb.innerText = symbol;
+            fb.style.color = color;
+            fb.style.display = 'block';
+            setTimeout(() => { fb.style.display = 'none'; }, 800);
+        }
+
+        function initConsonants() {
+            const grid = document.getElementById('consonant-grid');
+            grid.innerHTML = '';
+            consonants.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = 'consonant-btn';
+                btn.innerText = c;
+                btn.onclick = () => checkConsonant(c);
+                grid.appendChild(btn);
+            });
+        }
+
+        function initAnimalList() {
+            const list = document.getElementById('animal-list');
+            list.innerHTML = '';
+            animals.forEach((animal, index) => {
+                const item = document.createElement('div');
+                item.className = 'animal-item';
+                item.id = `animal-item-${index}`;
+                
+                const itemCanvas = document.createElement('canvas');
+                itemCanvas.width = 65; itemCanvas.height = 65;
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'name';
+                nameDiv.innerText = animal.name;
+
+                item.appendChild(itemCanvas);
+                item.appendChild(nameDiv);
+                
+                item.onclick = () => {
+                    selectAnimal(index);
+                    speakCurrentAnimal();
+                };
+                list.appendChild(item);
+
+                drawAnimalCrop(itemCanvas, index);
+            });
+        }
+
+        function selectAnimal(index) {
+            currentAnimalIndex = index;
+            document.querySelectorAll('.animal-item').forEach(i => i.classList.remove('selected'));
+            const selectedEl = document.getElementById(`animal-item-${index}`);
+            if (selectedEl) selectedEl.classList.add('selected');
+            updateGuideText();
+            clearCanvas();
+        }
+
+        function loadGame2() { selectAnimal(currentAnimalIndex); }
+
+        function updateGuideText() {
+            const animal = animals[currentAnimalIndex];
+            const guideEl = document.getElementById('guide-text');
+            const name = animal.name;
+
+            const container = document.getElementById('canvas-container');
+            const h = container.clientHeight || 400;
+
+            let fontRatio = 0.7;
+            if (name.length === 3) fontRatio = 0.55;
+            if (name.length >= 4) fontRatio = 0.45;
+
+            const calculatedFontSize = Math.floor(h * fontRatio);
+            guideEl.style.fontSize = `${calculatedFontSize}px`;
+
+            if (currentGame === 'g2-1') {
+                let html = `<span style="color: #9e9e9e;">${name[0]}</span>`;
+                if (name.length > 1) {
+                    html += `<span style="color: #212121;">${name.slice(1)}</span>`;
+                }
+                guideEl.innerHTML = html;
+            } else if (currentGame === 'g2-2') {
+                guideEl.innerHTML = `<span style="color: #9e9e9e;">${name}</span>`;
+            }
+        }
+
+        let drawCanvas, ctx, isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let isPointerEventsSupported = window.PointerEvent ? true : false;
+        let resizeTimeout = null;
+
+        function initCanvas() {
+            drawCanvas = document.getElementById('draw-canvas');
+            ctx = drawCanvas.getContext('2d');
+            
+            resizeCanvas();
+
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    resizeCanvas();
+                    updateGuideText();
+                }, 150);
+            });
+
+            if (isPointerEventsSupported) {
+                drawCanvas.addEventListener('pointerdown', startDrawing);
+                drawCanvas.addEventListener('pointermove', draw);
+                drawCanvas.addEventListener('pointerup', stopDrawing);
+                drawCanvas.addEventListener('pointercancel', stopDrawing);
+            } else {
+                drawCanvas.addEventListener('touchstart', startDrawing);
+                drawCanvas.addEventListener('touchmove', draw);
+                drawCanvas.addEventListener('touchend', stopDrawing);
+            }
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !drawCanvas) return;
+            
+            const rect = container.getBoundingClientRect();
+            
+            drawCanvas.width = rect.width;
+            drawCanvas.height = rect.height;
+            
+            ctx = drawCanvas.getContext('2d');
+            clearCanvas();
+        }
+
+        function clearCanvas() {
+            if (ctx && drawCanvas) {
+                ctx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            }
+        }
+
+        function getEventPos(e) {
+            const rect = drawCanvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            e.preventDefault();
+            initAudio();
+            isDrawing = true;
+
+            const pos = getEventPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+
+            const pos = getEventPos(e);
+
+            requestAnimationFrame(() => {
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#1565c0';
+                ctx.lineWidth = 14;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+
+                lastX = pos.x;
+                lastY = pos.y;
+            });
+        }
+
+        function stopDrawing(e) {
+            isDrawing = false;
+        }
+    </script>
+</body>
+</html>
