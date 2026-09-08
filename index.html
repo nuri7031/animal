@@ -538,20 +538,17 @@
         let bgmIsOn = true;
         let bgmTimer = null;
 
-        // GitHub 파일명 대응 (animal.jpg / animal.png 자동 감지)
+        // 상대 경로(./animal.jpg) 지정 및 캐시 우회 연결
         window.addEventListener('DOMContentLoaded', () => {
-            tryLoadImage('animal.jpg', () => {
-                tryLoadImage('animal.png', () => {
-                    tryLoadImage('animal.jpeg', () => {
-                        console.log('이미지를 찾을 수 없습니다.');
-                    });
-                });
-            });
+            loadDefaultImage();
         });
 
-        function tryLoadImage(filename, onError) {
+        function loadDefaultImage() {
+            const timestamp = new Date().getTime();
+            // 상대 경로 명시
+            const targetSrc = `./animal.jpg?v=${timestamp}`;
+            
             const img = new Image();
-            img.src = filename + '?v=' + new Date().getTime(); // 캐시 방지
             img.onload = () => {
                 spriteImage = img;
                 isImageLoaded = true;
@@ -560,7 +557,20 @@
                 initCanvas();
                 switchGame('g0');
             };
-            img.onerror = onError;
+            img.onerror = () => {
+                // 확장자가 jpeg나 PNG일 경우 대응
+                const altImg = new Image();
+                altImg.onload = () => {
+                    spriteImage = altImg;
+                    isImageLoaded = true;
+                    initConsonants();
+                    initAnimalList();
+                    initCanvas();
+                    switchGame('g0');
+                };
+                altImg.src = `./animal.jpeg?v=${timestamp}`;
+            };
+            img.src = targetSrc;
         }
 
         function initAudio() {
@@ -570,13 +580,9 @@
             }
         }
 
-        // 🎵 신나고 풍성한 8비트 스타일 동물농장 BGM
         function startBGM() {
             if (bgmTimer) clearTimeout(bgmTimer);
-            
-            // C 메이저 스케일 주파수
-            const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
-            
+            const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, C5 = 523.25;
             const melody = [
                 { f: C4, d: 0.2 }, { f: E4, d: 0.2 }, { f: G4, d: 0.2 }, { f: C5, d: 0.4 },
                 { f: A4, d: 0.2 }, { f: F4, d: 0.2 }, { f: G4, d: 0.4 },
@@ -585,32 +591,24 @@
             ];
 
             let step = 0;
-
             function playNextNote() {
                 if (!bgmIsOn || !audioCtx) return;
-
                 const note = melody[step];
                 try {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    
-                    osc.type = 'sine'; // 부드러운 오르골 톤
+                    osc.type = 'sine';
                     osc.frequency.setValueAtTime(note.f, audioCtx.currentTime);
-                    
                     gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + note.d);
-                    
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    
                     osc.start();
                     osc.stop(audioCtx.currentTime + note.d);
-
                     step = (step + 1) % melody.length;
                     bgmTimer = setTimeout(playNextNote, note.d * 1000 + 50);
                 } catch(e) {}
             }
-
             playNextNote();
         }
 
