@@ -127,7 +127,6 @@
             margin-bottom: 8px;
         }
 
-        /* 1. 동물 어휘 학습 */
         .vocab-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -218,7 +217,6 @@
             100% { transform: scale(1); }
         }
 
-        /* 2. 자음 찾기 */
         .g1-content {
             display: flex;
             flex-direction: column;
@@ -272,7 +270,6 @@
             box-shadow: 0 5px #66bb6a;
         }
 
-        /* 3, 4. 글씨쓰기 */
         .g2-layout {
             display: flex;
             flex-direction: column;
@@ -453,7 +450,7 @@
             </nav>
         </div>
         <div class="header-controls">
-            <label for="file-input" class="upload-btn">📁 다른 이미지 연결</label>
+            <label for="file-input" class="upload-btn">📁 수동 연결</label>
             <input type="file" id="file-input" accept="image/*" onchange="handleImageUpload(event)">
             <button id="bgm-toggle-btn" class="bgm-btn active" onclick="toggleBGM()">🎵 BGM ON</button>
         </div>
@@ -539,19 +536,32 @@
 
         let audioCtx = null;
         let bgmIsOn = true;
-        let bgmInterval = null;
+        let bgmTimer = null;
 
-        // 웹 페이지 로드 시 animal.jpeg 자동 연결
+        // GitHub 파일명 대응 (animal.jpg / animal.png 자동 감지)
         window.addEventListener('DOMContentLoaded', () => {
-            spriteImage.src = 'animal.jpeg';
-            spriteImage.onload = () => {
+            tryLoadImage('animal.jpg', () => {
+                tryLoadImage('animal.png', () => {
+                    tryLoadImage('animal.jpeg', () => {
+                        console.log('이미지를 찾을 수 없습니다.');
+                    });
+                });
+            });
+        });
+
+        function tryLoadImage(filename, onError) {
+            const img = new Image();
+            img.src = filename + '?v=' + new Date().getTime(); // 캐시 방지
+            img.onload = () => {
+                spriteImage = img;
                 isImageLoaded = true;
                 initConsonants();
                 initAnimalList();
                 initCanvas();
                 switchGame('g0');
             };
-        });
+            img.onerror = onError;
+        }
 
         function initAudio() {
             if (!audioCtx) {
@@ -560,26 +570,48 @@
             }
         }
 
+        // 🎵 신나고 풍성한 8비트 스타일 동물농장 BGM
         function startBGM() {
-            if (bgmInterval) clearInterval(bgmInterval);
-            const melody = [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 392.00];
-            let noteIdx = 0;
-            bgmInterval = setInterval(() => {
+            if (bgmTimer) clearTimeout(bgmTimer);
+            
+            // C 메이저 스케일 주파수
+            const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, B4 = 493.88, C5 = 523.25;
+            
+            const melody = [
+                { f: C4, d: 0.2 }, { f: E4, d: 0.2 }, { f: G4, d: 0.2 }, { f: C5, d: 0.4 },
+                { f: A4, d: 0.2 }, { f: F4, d: 0.2 }, { f: G4, d: 0.4 },
+                { f: E4, d: 0.2 }, { f: C4, d: 0.2 }, { f: D4, d: 0.2 }, { f: G4, d: 0.4 },
+                { f: C4, d: 0.4 }, { f: E4, d: 0.4 }, { f: C4, d: 0.4 }
+            ];
+
+            let step = 0;
+
+            function playNextNote() {
                 if (!bgmIsOn || !audioCtx) return;
+
+                const note = melody[step];
                 try {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(melody[noteIdx], audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime); 
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
+                    
+                    osc.type = 'sine'; // 부드러운 오르골 톤
+                    osc.frequency.setValueAtTime(note.f, audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + note.d);
+                    
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
+                    
                     osc.start();
-                    osc.stop(audioCtx.currentTime + 0.22);
-                    noteIdx = (noteIdx + 1) % melody.length;
+                    osc.stop(audioCtx.currentTime + note.d);
+
+                    step = (step + 1) % melody.length;
+                    bgmTimer = setTimeout(playNextNote, note.d * 1000 + 50);
                 } catch(e) {}
-            }, 280);
+            }
+
+            playNextNote();
         }
 
         function toggleBGM() {
@@ -589,9 +621,11 @@
                 btn.innerText = '🎵 BGM ON';
                 btn.classList.add('active');
                 initAudio();
+                startBGM();
             } else {
                 btn.innerText = '🔇 BGM OFF';
                 btn.classList.remove('active');
+                if (bgmTimer) clearTimeout(bgmTimer);
             }
         }
 
