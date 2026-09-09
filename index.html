@@ -17,7 +17,7 @@
             width: 100vw;
             height: 100vh;
             margin: 0;
-            padding: 0 0 20vh 0; /* 👈 하단 20% 여백 설정 */
+            padding: 0 0 10vh 0; /* 하단 여백 10% */
             overflow: hidden;
             background-color: #f4f6f8;
             display: flex;
@@ -97,7 +97,7 @@
         .container {
             width: 100%;
             flex-grow: 1;
-            padding: 8px 12px;
+            padding: 6px 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -122,53 +122,54 @@
             padding: 4px 16px;
             border-radius: 16px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 14px;
             border: 1px solid #a5d6a7;
             flex-shrink: 0;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         /* [게임 1] 어휘 학습 */
         .vocab-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
             width: 100%;
-            max-width: 520px;
+            max-width: 650px;
             flex-grow: 1;
             align-items: center;
             justify-content: center;
         }
         .vocab-card {
             background: white;
-            border-radius: 16px;
-            padding: 8px;
+            border-radius: 20px;
+            padding: 10px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             border: 3px solid #eee;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            max-height: 180px;
+            height: 100%;
+            max-height: 250px;
             position: relative;
         }
         .vocab-card canvas {
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
         }
         .drop-box {
             width: 100%;
-            height: 38px;
-            margin-top: 6px;
-            border: 2px dashed #90caf9;
-            border-radius: 8px;
+            height: 48px;
+            margin-top: 8px;
+            border: 3px dashed #90caf9;
+            border-radius: 12px;
             background-color: #f1f8e9;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: 24px;
             font-weight: bold;
             color: #2e7d32;
             transition: all 0.2s;
@@ -179,21 +180,21 @@
             transform: scale(1.02);
         }
         .drop-box.correct {
-            border: 2px solid #4caf50;
+            border: 3px solid #4caf50;
             background-color: #e8f5e9;
         }
 
         .word-pool {
             display: flex;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
             align-items: center;
             width: 100%;
-            max-width: 520px;
-            min-height: 60px;
-            padding: 6px;
+            max-width: 650px;
+            min-height: 75px;
+            padding: 8px;
             background: white;
-            border-radius: 16px;
+            border-radius: 18px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.05);
             flex-shrink: 0;
             margin-top: 6px;
@@ -202,18 +203,18 @@
         .word-chip {
             background-color: #ffb74d;
             color: white;
-            font-size: 20px;
+            font-size: 26px;
             font-weight: bold;
-            padding: 8px 20px;
-            border-radius: 12px;
+            padding: 10px 28px;
+            border-radius: 14px;
             cursor: grab;
-            box-shadow: 0 3px #f57c00;
+            box-shadow: 0 4px #f57c00;
             touch-action: none;
         }
         
         .practice-highlight {
             border-color: #ff6f00 !important;
-            box-shadow: 0 0 14px rgba(255, 111, 0, 0.8) !important;
+            box-shadow: 0 0 16px rgba(255, 111, 0, 0.8) !important;
             animation: pulse 1.2s infinite;
         }
         @keyframes pulse {
@@ -222,66 +223,71 @@
             100% { transform: scale(1); }
         }
 
-        /* [게임 2] 자음 찾기 */
+        /* [게임 2] 그림 크기 대폭 확대 수정 */
         .g1-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-evenly;
+            justify-content: space-between;
             flex-grow: 1;
             width: 100%;
+            padding: 4px 0;
         }
         .card-display {
             background: white;
-            border-radius: 16px;
-            padding: 6px 16px;
+            border-radius: 24px;
+            padding: 12px 28px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             cursor: pointer;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             border: 3px solid #fff3e0;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 500px;
         }
         #g1-canvas {
-            width: 110px;
-            height: 110px;
-            border-radius: 10px;
+            width: 220px; /* 👈 그림 크기 크게 확대 (기존 150px) */
+            height: 220px;
+            border-radius: 16px;
         }
         .animal-name {
-            font-size: 20px;
+            font-size: 30px; /* 👈 글자 크기도 시원하게 확대 */
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 8px;
             color: #333;
         }
 
         .consonant-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 10px;
             width: 100%;
-            max-width: 680px;
+            max-width: 750px;
+            margin-top: 8px;
         }
         .consonant-btn {
             background-color: #81c784;
             color: white;
-            font-size: 26px;
+            font-size: 32px;
             font-weight: bold;
             border: none;
-            border-radius: 14px;
-            padding: 12px 0;
+            border-radius: 16px;
+            padding: 14px 0;
             cursor: pointer;
-            box-shadow: 0 4px #66bb6a;
+            box-shadow: 0 5px #66bb6a;
         }
 
-        /* [게임 3, 4] 첫글자 / 전체 쓰기 */
+        /* [게임 3, 4] 쓰기 관련 */
         .g2-layout {
             display: flex;
             flex-direction: column;
             width: 100%;
             height: 100%;
-            gap: 8px;
+            gap: 6px;
         }
         
         .canvas-container {
@@ -328,51 +334,55 @@
         .write-bottom-bar {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
-            height: 95px;
+            height: 145px;
             flex-shrink: 0;
         }
 
         .write-controls {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             flex-shrink: 0;
         }
         .write-controls button {
-            padding: 10px 16px;
-            font-size: 13px;
+            padding: 12px 18px;
+            font-size: 14px;
             font-weight: bold;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             background-color: #ff80ab;
             color: white;
             cursor: pointer;
-            box-shadow: 0 2px rgba(0,0,0,0.1);
+            box-shadow: 0 3px rgba(0,0,0,0.1);
             white-space: nowrap;
         }
 
-        .animal-list {
-            display: flex;
-            gap: 10px;
+        .animal-list-grid {
+            display: grid;
+            grid-template-rows: repeat(2, 1fr);
+            grid-auto-flow: column;
+            gap: 6px;
             flex-grow: 1;
             overflow-x: auto;
-            padding: 4px 0;
+            padding: 2px 0;
             align-items: center;
             -webkit-overflow-scrolling: touch;
+            height: 100%;
         }
         .animal-item {
             background: white;
             border: 2px solid #eee;
-            border-radius: 14px;
-            padding: 6px;
+            border-radius: 12px;
+            padding: 4px 6px;
             text-align: center;
             cursor: pointer;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            min-width: 76px;
+            gap: 6px;
+            min-width: 105px;
+            height: 62px;
             flex-shrink: 0;
             transition: transform 0.1s;
         }
@@ -384,15 +394,16 @@
             background-color: #fff8e1;
         }
         .animal-item canvas {
-            width: 54px;
-            height: 54px;
-            border-radius: 10px;
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            flex-shrink: 0;
         }
         .animal-item .name {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
-            margin-top: 4px;
             color: #444;
+            white-space: nowrap;
         }
 
         .modal-overlay {
@@ -430,7 +441,7 @@
             position: fixed;
             top: 40%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 110px;
+            font-size: 120px;
             display: none;
             z-index: 100;
             text-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -473,7 +484,8 @@
             <div id="status-badge" class="status-badge">연습 게임 (1/3)</div>
             <div class="g1-content">
                 <div class="card-display" onclick="speakCurrentAnimal()">
-                    <canvas id="g1-canvas" width="110" height="110"></canvas>
+                    <!-- 2번 게임 캔버스 해상도를 220px로 확장 -->
+                    <canvas id="g1-canvas" width="220" height="220"></canvas>
                     <div class="animal-name" id="g1-name">기린</div>
                 </div>
                 <div class="consonant-grid" id="consonant-grid"></div>
@@ -491,7 +503,7 @@
                         <button onclick="speakCurrentAnimal()">🔊 소리 듣기</button>
                         <button onclick="clearCanvas()">지우기</button>
                     </div>
-                    <div class="animal-list" id="animal-list"></div>
+                    <div class="animal-list-grid" id="animal-list"></div>
                 </div>
             </div>
         </div>
@@ -733,7 +745,7 @@
                 card.id = `vocab-card-${idx}`;
 
                 const c = document.createElement('canvas');
-                c.width = 100; c.height = 100;
+                c.width = 140; c.height = 140;
                 card.appendChild(c);
                 drawAnimalCrop(c, animals.indexOf(animal));
 
@@ -1032,7 +1044,7 @@
                 item.id = `animal-item-${index}`;
                 
                 const itemCanvas = document.createElement('canvas');
-                itemCanvas.width = 54; itemCanvas.height = 54;
+                itemCanvas.width = 52; itemCanvas.height = 52;
 
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'name';
@@ -1071,9 +1083,9 @@
             const container = document.getElementById('canvas-container');
             const h = container.clientHeight || 300;
 
-            let fontRatio = 0.6;
-            if (name.length === 3) fontRatio = 0.45;
-            if (name.length >= 4) fontRatio = 0.35;
+            let fontRatio = 0.65;
+            if (name.length === 3) fontRatio = 0.5;
+            if (name.length >= 4) fontRatio = 0.4;
 
             const calculatedFontSize = Math.floor(h * fontRatio);
             guideEl.style.fontSize = `${calculatedFontSize}px`;
@@ -1180,7 +1192,7 @@
                 ctx.moveTo(lastX, lastY);
                 ctx.lineTo(pos.x, pos.y);
                 ctx.strokeStyle = '#1565c0';
-                ctx.lineWidth = 10;
+                ctx.lineWidth = 12;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.stroke();
